@@ -854,6 +854,53 @@ jobs:
           CONFIG_FILE=./arch/arm64/configs/gki_defconfig
           KERNEL_VERSION="${{ env.KERNEL_VERSION }}"
 
+          # --- 1. Docker & LXC 核心适配补丁 (从 tomxi1997 项目精炼) ---
+          # 强制清理可能冲突的配置并追加新选项
+          sed -i '/CONFIG_SYSVIPC/d' "$CONFIG_FILE"
+          
+          cat <<EOF >> "$CONFIG_FILE"
+          # 核心隔离功能
+          CONFIG_SYSVIPC=y
+          CONFIG_POSIX_MQUEUE=y
+          CONFIG_NAMESPACES=y
+          CONFIG_USER_NS=y
+          CONFIG_PID_NS=y
+          CONFIG_IPC_NS=y
+          CONFIG_NET_NS=y
+          CONFIG_UTS_NS=y
+          
+          # Cgroups 资源限制
+          CONFIG_CGROUPS=y
+          CONFIG_MEMCG=y
+          CONFIG_MEMCG_SWAP=y
+          CONFIG_BLK_CGROUP=y
+          CONFIG_CGROUP_SCHED=y
+          CONFIG_CGROUP_CPUACCT=y
+          CONFIG_CGROUP_FREEZER=y
+          CONFIG_CPUSETS=y
+          CONFIG_CGROUP_DEVICE=y
+          CONFIG_CGROUP_BPF=y
+          
+          # 网络桥接与虚拟网卡
+          CONFIG_BRIDGE=y
+          CONFIG_BRIDGE_NETFILTER=y
+          CONFIG_VETH=y
+          CONFIG_TUN=y
+          CONFIG_IP_NF_FILTER=y
+          CONFIG_IP_NF_NAT=y
+          CONFIG_IP_NF_TARGET_MASQUERADE=y
+          CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+          CONFIG_NETFILTER_XT_MATCH_CONNTRACK=y
+          CONFIG_NETFILTER_XT_MATCH_IPVS=y
+          CONFIG_NETFILTER_XT_MARK=y
+          CONFIG_NETFILTER_XT_TARGET_CHECKSUM=y
+          
+          # 文件系统与调试
+          CONFIG_OVERLAY_FS=y
+          CONFIG_IKCONFIG=y
+          CONFIG_IKCONFIG_PROC=y
+          EOF"
+
           # SukiSU Ultra配置
           echo "CONFIG_KSU=y" >> "$CONFIG_FILE"
 
